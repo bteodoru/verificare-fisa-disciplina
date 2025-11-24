@@ -1,0 +1,20 @@
+{
+  "discipline": [
+    {
+      "cod": "IG.IA.202",
+      "denumire_ro": "Modelare în ingineria geotenică",
+      "denumire_en": "Modelling in Geotechnical Engineering",
+      "an": 2,
+      "semestru": 3,
+      "credite": 5,
+      "categoria": "DA",
+      "nr_ore_saptamana": {
+        "curs": 2,
+        "seminar": 0,
+        "proiect": 0,
+        "lucrari": 2
+      },
+      "evaluare": "C"
+    }
+  ]
+}
