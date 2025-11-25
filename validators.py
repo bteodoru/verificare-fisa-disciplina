@@ -226,6 +226,7 @@ def validate_fisa(fisa_data: Dict[str, Any], plan_data: Dict[str, Any]) -> Dict[
     Returns:
         Dicționar cu toate rezultatele validării
     """
+    print(fisa_data)
     # Găsește disciplina în plan după cod
     disciplina_plan = None
     for disc in plan_data['discipline']:

@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verificare Fișe Disciplină</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen" x-data="fisaApp()" x-cloak @disciplina-selected.window="selectedDisciplinaCod = $event.detail.cod">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Verificare Fișă Disciplină</h1>
+            <p class="mt-1 text-sm text-gray-500">Sistem automatizat pentru verificarea conformității</p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707-9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              Online
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Upload Section -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">1. Încarcă fișa disciplinei</h2>
+
+        <!-- Upload Zone -->
+        <div
+          @dragover.prevent="isDragging = true"
+          @dragleave.prevent="isDragging = false"
+          @drop.prevent="handleDrop($event)"
+          :class="{'border-blue-500 bg-blue-50': isDragging}"
+          class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors duration-200"
+        >
+          <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+            <path
+              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+
+          <div class="mt-4">
+            <label for="file-upload" class="cursor-pointer">
+              <span class="mt-2 block text-sm font-medium text-gray-900">
+                Trage fișierul aici sau
+                <span class="text-blue-600 hover:text-blue-500">caută pe computer</span>
+              </span>
+              <input id="file-upload" type="file" accept=".docx" @change="handleFileSelect($event)" class="sr-only" />
+            </label>
+            <p class="mt-1 text-xs text-gray-500">fișier .docx până la 10MB</p>
+          </div>
+
+          <!-- Selected File -->
+          <div x-show="selectedFile" class="mt-4 p-4 bg-gray-50 rounded-lg inline-flex items-center">
+            <svg class="w-8 h-8 text-blue-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+            </svg>
+            <div class="text-left">
+              <p class="text-sm font-medium text-gray-900" x-text="selectedFile?.name"></p>
+              <p class="text-xs text-gray-500" x-text="formatFileSize(selectedFile?.size)"></p>
+            </div>
+            <button @click="clearFile()" class="ml-4 text-gray-400 hover:text-gray-600">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Discipline Selection Section -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8" x-show="selectedFile">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">2. Selectează disciplina (opțional)</h2>
+        <p class="text-sm text-gray-600 mb-4">Dacă nu selectezi, se va detecta automat din fișă. Selectarea manuală este utilă pentru verificare suplimentară.</p>
+
+        <!-- Search Select Component -->
+        <div class="relative" x-data="selectDisciplina()">
+          <label for="disciplina-search" class="block text-sm font-medium text-gray-700 mb-2"> Caută după cod sau denumire </label>
+
+          <!-- Search Input -->
+          <div class="relative">
+            <input
+              type="text"
+              id="disciplina-search"
+              x-model="searchQuery"
+              @focus="onFocus()"
+              @input="onSearchInput()"
+              @keydown.escape="closeDropdown()"
+              @keydown.arrow-down.prevent="navigateDown()"
+              @keydown.arrow-up.prevent="navigateUp()"
+              @keydown.enter.prevent="selectHighlighted()"
+              @click.outside="closeDropdown()"
+              placeholder="Ex: IG.IA.202 sau Modelare..."
+              class="block w-full rounded-md border-0 py-2 pl-4 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+            />
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Selected Discipline Display -->
+          <div x-show="selectedDisciplina" class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <p class="text-sm font-medium text-blue-900" x-text="selectedDisciplina?.cod"></p>
+                <p class="text-sm text-blue-700" x-text="selectedDisciplina?.denumire_ro"></p>
+                <p class="text-xs text-blue-600 mt-1">An <span x-text="selectedDisciplina?.an"></span>, Sem <span x-text="selectedDisciplina?.semestru"></span> • <span x-text="selectedDisciplina?.credite"></span> credite</p>
+              </div>
+              <button @click="clearSelection()" class="ml-3 text-blue-600 hover:text-blue-800">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dropdown Results -->
+          <div
+            x-show="isOpen"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95"
+            class="absolute z-10 mt-2 w-full max-h-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+          >
+            <template x-for="(disciplina, index) in filteredDiscipline" :key="disciplina.cod">
+              <div
+                @click="selectDisciplina(disciplina)"
+                @mouseenter="highlightedIndex = index"
+                :class="{'bg-blue-600 text-white': highlightedIndex === index, 'text-gray-900': highlightedIndex !== index}"
+                class="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-blue-600 hover:text-white"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium truncate" x-text="disciplina.cod"></p>
+                    <p class="text-sm truncate" :class="{'text-blue-100': highlightedIndex === index, 'text-gray-600': highlightedIndex !== index}" x-text="disciplina.denumire_ro"></p>
+                  </div>
+                  <div class="ml-3 flex-shrink-0">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="{'bg-blue-700 text-white': highlightedIndex === index, 'bg-gray-100 text-gray-800': highlightedIndex !== index}">
+                      An <span x-text="disciplina.an"></span> • Sem <span x-text="disciplina.semestru"></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- No results -->
+            <div x-show="filteredDiscipline.length === 0 && searchQuery" class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-700">
+              <p class="text-sm">Nu s-au găsit rezultate pentru "<span x-text="searchQuery"></span>"</p>
+            </div>
+
+            <!-- Show all disciplines when no search query -->
+            <div x-show="filteredDiscipline.length === 0 && !searchQuery" class="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-700">
+              <p class="text-sm">Nu există discipline disponibile</p>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div x-show="isLoading" class="mt-2 text-sm text-gray-500">Se încarcă disciplinele...</div>
+        </div>
+      </div>
+
+      <!-- Validate Button -->
+      <div class="text-center mb-8">
+        <button
+          @click="validateFisa()"
+          :disabled="!selectedFile || isValidating"
+          :class="{'opacity-50 cursor-not-allowed': !selectedFile || isValidating}"
+          class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+        >
+          <svg x-show="isValidating" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span x-text="isValidating ? 'Se validează...' : 'Validează Fișa'"></span>
+        </button>
+      </div>
+
+      <!-- Results Section -->
+      <div x-show="rezultat" x-transition class="space-y-6">
+        <!-- Status Card -->
+        <div
+          :class="{
+                'bg-green-50 border-green-200': rezultat?.validare?.status === 'success',
+                'bg-yellow-50 border-yellow-200': rezultat?.validare?.status === 'warning',
+                'bg-red-50 border-red-200': rezultat?.validare?.status === 'error'
+            }"
+          class="rounded-lg border-2 p-6"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <!-- Success Icon -->
+              <svg x-show="rezultat?.validare?.status === 'success'" class="w-10 h-10 text-green-500 mr-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707-9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <!-- Warning Icon -->
+              <svg x-show="rezultat?.validare?.status === 'warning'" class="w-10 h-10 text-yellow-500 mr-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <!-- Error Icon -->
+              <svg x-show="rezultat?.validare?.status === 'error'" class="w-10 h-10 text-red-500 mr-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+
+              <div>
+                <h3
+                  class="text-2xl font-bold"
+                  :class="{
+                                'text-green-900': rezultat?.validare?.status === 'success',
+                                'text-yellow-900': rezultat?.validare?.status === 'warning',
+                                'text-red-900': rezultat?.validare?.status === 'error'
+                            }"
+                  x-text="getStatusTitle()"
+                ></h3>
+                <p
+                  class="mt-1 text-sm"
+                  :class="{
+                                'text-green-700': rezultat?.validare?.status === 'success',
+                                'text-yellow-700': rezultat?.validare?.status === 'warning',
+                                'text-red-700': rezultat?.validare?.status === 'error'
+                            }"
+                  x-text="rezultat?.validare?.summary"
+                ></p>
+              </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="text-right">
+              <div
+                class="text-3xl font-bold"
+                :class="{
+                            'text-green-600': rezultat?.validare?.status === 'success',
+                            'text-yellow-600': rezultat?.validare?.status === 'warning',
+                            'text-red-600': rezultat?.validare?.status === 'error'
+                        }"
+              >
+                <span x-text="rezultat?.validare?.statistici?.succes"></span>/<span x-text="rezultat?.validare?.statistici?.total_verificari"></span>
+              </div>
+              <p class="text-sm text-gray-600">verificări</p>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+            <div
+              :style="`width: ${(rezultat?.validare?.statistici?.succes / rezultat?.validare?.statistici?.total_verificari * 100)}%`"
+              :class="{
+                            'bg-green-600': rezultat?.validare?.status === 'success',
+                            'bg-yellow-600': rezultat?.validare?.status === 'warning',
+                            'bg-red-600': rezultat?.validare?.status === 'error'
+                        }"
+              class="h-2 rounded-full transition-all duration-500"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Informații Disciplină</h3>
+          <dl class="grid grid-cols-2 gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Cod</dt>
+              <dd class="mt-1 text-sm text-gray-900" x-text="rezultat?.validare?.cod"></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Denumire</dt>
+              <dd class="mt-1 text-sm text-gray-900" x-text="rezultat?.validare?.denumire"></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Fișier</dt>
+              <dd class="mt-1 text-sm text-gray-900" x-text="rezultat?.filename"></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Data verificării</dt>
+              <dd class="mt-1 text-sm text-gray-900" x-text="new Date().toLocaleString('ro-RO')"></dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Validation Details -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Comparatie Plan -->
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                <path
+                  fill-rule="evenodd"
+                  d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Comparație Plan
+            </h3>
+            <div class="space-y-2">
+              <template x-for="(validare, key) in rezultat?.validare?.validari?.comparatie_plan" :key="key">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600" x-text="formatKey(key)"></span>
+                  <span
+                    :class="{
+                                    'text-green-600': validare.status === 'ok',
+                                    'text-yellow-600': validare.status === 'warning',
+                                    'text-red-600': validare.status === 'error'
+                                }"
+                    x-text="validare.status === 'ok' ? '✓' : validare.status === 'warning' ? '⚠' : '✗'"
+                  ></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Verificari Matematice -->
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+              </svg>
+              Formule
+            </h3>
+            <div class="space-y-2">
+              <template x-for="(validare, key) in rezultat?.validare?.validari?.verificari_matematice" :key="key">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600" x-text="formatKey(key)"></span>
+                  <span
+                    :class="{
+                                    'text-green-600': validare.status === 'ok',
+                                    'text-red-600': validare.status === 'error'
+                                }"
+                    x-text="validare.status === 'ok' ? '✓' : '✗'"
+                  ></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Verificari Intervale -->
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11 4a1 1 0 10-2 0v4a1 1 0 102 0V7zm-3 1a1 1 0 10-2 0v3a1 1 0 102 0V8zM8 9a1 1 0 00-2 0v2a1 1 0 102 0V9z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Intervale
+            </h3>
+            <div class="space-y-2">
+              <template x-for="(validare, key) in rezultat?.validare?.validari?.verificari_intervale" :key="key">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600" x-text="formatKey(key)"></span>
+                  <span
+                    :class="{
+                                    'text-green-600': validare.status === 'ok',
+                                    'text-red-600': validare.status === 'error'
+                                }"
+                    x-text="validare.status === 'ok' ? '✓' : '✗'"
+                  ></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Errors and Warnings -->
+        <div x-show="hasErrorsOrWarnings()" class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Detalii Probleme</h3>
+
+          <!-- Errors -->
+          <div x-show="getErrors().length > 0" class="mb-4">
+            <h4 class="text-md font-medium text-red-900 mb-2">✗ Erori</h4>
+            <ul class="space-y-2">
+              <template x-for="error in getErrors()" :key="error">
+                <li class="text-sm text-red-700 bg-red-50 p-3 rounded-md" x-text="error"></li>
+              </template>
+            </ul>
+          </div>
+
+          <!-- Warnings -->
+          <div x-show="getWarnings().length > 0">
+            <h4 class="text-md font-medium text-yellow-900 mb-2">⚠ Avertismente</h4>
+            <ul class="space-y-2">
+              <template x-for="warning in getWarnings()" :key="warning">
+                <li class="text-sm text-yellow-700 bg-yellow-50 p-3 rounded-md" x-text="warning"></li>
+              </template>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-center space-x-4">
+          <button
+            @click="downloadJSON()"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            Descarcă Raport JSON
+          </button>
+
+          <button
+            @click="clearResults()"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Verifică altă fișă
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 bg-white border-t border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <p class="text-center text-sm text-gray-500">Sistem Verificare Fișe Disciplină v1.0 | Universitatea Tehnică "Gheorghe Asachi" din Iași</p>
+      </div>
+    </footer>
+
+    <script>
+      function fisaApp() {
+        return {
+          selectedFile: null,
+          isDragging: false,
+          isValidating: false,
+          rezultat: null,
+          selectedDisciplinaCod: null, // Cod disciplină selectată manual
+
+          handleFileSelect(event) {
+            const file = event.target.files[0]
+            if (file && file.name.endsWith(".docx")) {
+              this.selectedFile = file
+            } else {
+              alert("Te rog să selectezi un fișier DOCX valid.")
+            }
+          },
+
+          handleDrop(event) {
+            this.isDragging = false
+            const file = event.dataTransfer.files[0]
+            if (file && file.name.endsWith(".docx")) {
+              this.selectedFile = file
+            } else {
+              alert("Te rog să încărci un fișier DOCX valid.")
+            }
+          },
+
+          clearFile() {
+            this.selectedFile = null
+            document.getElementById("file-upload").value = ""
+          },
+
+          formatFileSize(bytes) {
+            if (!bytes) return ""
+            if (bytes < 1024) return bytes + " B"
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB"
+            return (bytes / (1024 * 1024)).toFixed(1) + " MB"
+          },
+
+          async validateFisa() {
+            if (!this.selectedFile) return
+
+            this.isValidating = true
+            const formData = new FormData()
+            formData.append("file", this.selectedFile)
+
+            // Adaugă codul disciplinei dacă este selectat manual
+            if (this.selectedDisciplinaCod) {
+              formData.append("cod_disciplina", this.selectedDisciplinaCod)
+            }
+
+            try {
+              const response = await fetch("/api/validate", {
+                method: "POST",
+                body: formData,
+              })
+
+              if (!response.ok) {
+                throw new Error("Eroare la validare")
+              }
+
+              this.rezultat = await response.json()
+            } catch (error) {
+              alert("Eroare: " + error.message)
+            } finally {
+              this.isValidating = false
+            }
+          },
+
+          getStatusTitle() {
+            const status = this.rezultat?.validare?.status
+            if (status === "success") return "Fișă Validă"
+            if (status === "warning") return "Atenție"
+            if (status === "error") return "Erori Detectate"
+            return ""
+          },
+
+          formatKey(key) {
+            return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+          },
+
+          hasErrorsOrWarnings() {
+            return this.getErrors().length > 0 || this.getWarnings().length > 0
+          },
+
+          getErrors() {
+            if (!this.rezultat?.validare?.validari) return []
+            const errors = []
+            const allValidations = {
+              ...this.rezultat.validare.validari.comparatie_plan,
+              ...this.rezultat.validare.validari.verificari_matematice,
+              ...this.rezultat.validare.validari.verificari_intervale,
+            }
+
+            for (const [key, val] of Object.entries(allValidations)) {
+              if (val.status === "error" && val.mesaj) {
+                errors.push(val.mesaj)
+              }
+            }
+            return errors
+          },
+
+          getWarnings() {
+            if (!this.rezultat?.validare?.validari) return []
+            const warnings = []
+            const allValidations = {
+              ...this.rezultat.validare.validari.comparatie_plan,
+              ...this.rezultat.validare.validari.verificari_matematice,
+              ...this.rezultat.validare.validari.verificari_intervale,
+            }
+
+            for (const [key, val] of Object.entries(allValidations)) {
+              if (val.status === "warning" && val.mesaj) {
+                warnings.push(val.mesaj)
+              }
+            }
+            return warnings
+          },
+
+          downloadJSON() {
+            const dataStr = JSON.stringify(this.rezultat, null, 2)
+            const dataBlob = new Blob([dataStr], { type: "application/json" })
+            const url = URL.createObjectURL(dataBlob)
+            const link = document.createElement("a")
+            link.href = url
+            link.download = `raport_validare_${this.rezultat.validare.cod}.json`
+            link.click()
+          },
+
+          clearResults() {
+            this.rezultat = null
+            this.clearFile()
+            this.selectedDisciplinaCod = null
+          },
+        }
+      }
+
+      // Componentă separată pentru select disciplină
+      function selectDisciplina() {
+        return {
+          discipline: [],
+          isLoading: true,
+          isOpen: false,
+          searchQuery: "",
+          selectedDisciplina: null,
+          highlightedIndex: 0,
+
+          async init() {
+            // Încarcă disciplinele la inițializare
+            try {
+              const response = await fetch("/api/discipline")
+              const data = await response.json()
+              this.discipline = data.discipline
+            } catch (error) {
+              console.error("Eroare la încărcarea disciplinelor:", error)
+            } finally {
+              this.isLoading = false
+            }
+          },
+
+          onSearchInput() {
+            // Când user tastează, deschide dropdown-ul și resetează indexul
+            this.isOpen = true
+            this.highlightedIndex = 0
+
+            // Dacă există o selecție și utilizatorul începe să tasteze, curăță selecția
+            if (this.selectedDisciplina && this.searchQuery) {
+              this.selectedDisciplina = null
+              window.dispatchEvent(
+                new CustomEvent("disciplina-selected", {
+                  detail: { cod: null },
+                })
+              )
+            }
+          },
+
+          onFocus() {
+            // Când input-ul primește focus, deschide dropdown-ul cu toate disciplinele
+            this.isOpen = true
+            this.highlightedIndex = 0
+          },
+
+          onBlur() {
+            // Închide dropdown-ul cu o mică întârziere pentru a permite click-ul pe opțiuni
+            setTimeout(() => {
+              this.isOpen = false
+            }, 200)
+          },
+
+          closeDropdown() {
+            this.isOpen = false
+          },
+
+          get filteredDiscipline() {
+            if (!this.searchQuery) {
+              // Când nu există căutare, returnează toate disciplinele
+              return this.discipline
+            }
+
+            const query = this.searchQuery.toLowerCase()
+            return this.discipline.filter((disc) => disc.cod.toLowerCase().includes(query) || disc.denumire_ro.toLowerCase().includes(query))
+          },
+
+          selectDisciplina(disciplina) {
+            this.selectedDisciplina = disciplina
+            this.searchQuery = ""
+            this.isOpen = false
+            this.highlightedIndex = 0
+
+            // Emite event pentru parent
+            window.dispatchEvent(
+              new CustomEvent("disciplina-selected", {
+                detail: { cod: disciplina.cod },
+              })
+            )
+          },
+
+          clearSelection() {
+            this.selectedDisciplina = null
+            this.searchQuery = ""
+            this.isOpen = true // Deschide dropdown-ul după curățare
+
+            // Emite event pentru a reseta
+            window.dispatchEvent(
+              new CustomEvent("disciplina-selected", {
+                detail: { cod: null },
+              })
+            )
+          },
+
+          navigateDown() {
+            if (this.highlightedIndex < this.filteredDiscipline.length - 1) {
+              this.highlightedIndex++
+            }
+          },
+
+          navigateUp() {
+            if (this.highlightedIndex > 0) {
+              this.highlightedIndex--
+            }
+          },
+
+          selectHighlighted() {
+            if (this.filteredDiscipline[this.highlightedIndex]) {
+              this.selectDisciplina(this.filteredDiscipline[this.highlightedIndex])
+            }
+          },
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -8,13 +8,127 @@
       "semestru": 3,
       "credite": 5,
       "categoria": "DA",
+      "nr_ore_saptamana_total": 4,
       "nr_ore_saptamana": {
         "curs": 2,
         "seminar": 0,
         "proiect": 0,
         "lucrari": 2
       },
-      "evaluare": "C"
+      "total_ore_plan": 56,
+      "distributie_fond_timp": {
+        "studiu_manual": 20,
+        "documentare": 25,
+        "pregatire_seminarii": 24,
+        "examinari": 2
+      },
+      "total_ore_studiu_individual": 69,
+      "total_ore_semestru": 125,
+      "evaluare": "E"
+    },
+    {
+      "cod": "IG.IA.101",
+      "denumire_ro": "Mecanica pământurilor",
+      "denumire_en": "Soil Mechanics",
+      "an": 1,
+      "semestru": 1,
+      "credite": 6,
+      "categoria": "DA",
+      "nr_ore_saptamana_total": 5,
+      "nr_ore_saptamana": {
+        "curs": 3,
+        "seminar": 0,
+        "proiect": 0,
+        "lucrari": 2
+      },
+      "total_ore_plan": 70,
+      "distributie_fond_timp": {
+        "studiu_manual": 25,
+        "documentare": 30,
+        "pregatire_seminarii": 25,
+        "examinari": 3
+      },
+      "total_ore_studiu_individual": 83,
+      "total_ore_semestru": 153,
+      "evaluare": "E"
+    },
+    {
+      "cod": "IG.IA.203",
+      "denumire_ro": "Fundații",
+      "denumire_en": "Foundations",
+      "an": 2,
+      "semestru": 3,
+      "credite": 5,
+      "categoria": "DA",
+      "nr_ore_saptamana_total": 4,
+      "nr_ore_saptamana": {
+        "curs": 2,
+        "seminar": 0,
+        "proiect": 2,
+        "lucrari": 0
+      },
+      "total_ore_plan": 56,
+      "distributie_fond_timp": {
+        "studiu_manual": 20,
+        "documentare": 25,
+        "pregatire_seminarii": 22,
+        "examinari": 2
+      },
+      "total_ore_studiu_individual": 69,
+      "total_ore_semestru": 125,
+      "evaluare": "E"
+    },
+    {
+      "cod": "IG.IA.301",
+      "denumire_ro": "Stabilitatea versanților",
+      "denumire_en": "Slope Stability",
+      "an": 3,
+      "semestru": 5,
+      "credite": 4,
+      "categoria": "DOP",
+      "nr_ore_saptamana_total": 3,
+      "nr_ore_saptamana": {
+        "curs": 2,
+        "seminar": 0,
+        "proiect": 1,
+        "lucrari": 0
+      },
+      "total_ore_plan": 42,
+      "distributie_fond_timp": {
+        "studiu_manual": 15,
+        "documentare": 20,
+        "pregatire_seminarii": 20,
+        "examinari": 2
+      },
+      "total_ore_studiu_individual": 57,
+      "total_ore_semestru": 100,
+      "evaluare": "E"
+    },
+    {
+      "cod": "IG.IA.204",
+      "denumire_ro": "Geologie inginerească",
+      "denumire_en": "Engineering Geology",
+      "an": 2,
+      "semestru": 4,
+      "credite": 4,
+      "categoria": "DA",
+      "nr_ore_saptamana_total": 3,
+      "nr_ore_saptamana": {
+        "curs": 2,
+        "seminar": 0,
+        "proiect": 0,
+        "lucrari": 1
+      },
+      "total_ore_plan": 42,
+      "distributie_fond_timp": {
+        "studiu_manual": 15,
+        "documentare": 20,
+        "pregatire_seminarii": 20,
+        "examinari": 2
+      },
+      "total_ore_studiu_individual": 57,
+      "total_ore_semestru": 100,
+      "evaluare": "V"
     }
   ]
 }
